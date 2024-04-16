@@ -1,0 +1,98 @@
+    TITLE   "liststack.a by Jared Sherwood -- linked list stacks"
+
+    USE     "hawk.h"
+    USE     "stdio.h"
+
+    USE     "stack.h"
+
+    INT     NEWLISTSTACK
+
+;EMPTY	=	0	; pointer to the empty method, see stack.h
+;PUSH	=	4	; pointer to the push method, see stack.h
+;POP	=	8	; pointer to the pop method, see stack.h
+
+HEADNODE	= 12
+OBJSIZE	    = 16
+SAVER3      = 20
+SAVER4      = 24 
+ARSIZE      = 28
+
+;===============
+NEWLISTSTACK:
+    
+    STORES      R1,R2
+    ADDSI       R2,ARSIZE
+                
+    LIS         R3, OBJSIZE
+    LIL         R1, MALLOC
+    JSRS        R1,R1		
+
+    LEA         R4,EMPTY
+    STORE       R4,R3,EMPTY	
+    LEA         R4,PUSH
+    STORE       R4,R3,PUSH
+    LEA         R4,POP
+    STORE       R4,R3,POP
+    LEA         R4, HEADNODE
+    STORE       R4,R3, HEADNODE
+    ADDSI       R2,-ARSIZE
+    LOADS       PC,R2
+
+
+;=============
+
+EMPTY:
+
+	LEA	        R4,R3, OBJSIZE
+	LOAD        R5,R3, HEADNODE
+	SUB	        R3, R4, R5	
+	BZS	        ZERO
+	LIS	        R3,-1
+
+;============
+
+ZERO:
+	NOT         R3
+
+	JUMPS       R1
+
+;==========
+
+NODEVAL         = 0 
+NODEPOINTER     = 4
+
+PUSH:
+
+    STORES      R1, R2
+    ADDSI       R2, ARSIZE
+    STORE       R3, R2  SAVER3
+    STORE       R4, R2, SAVER4
+    LIS         R3, 8
+    LIL         R1, MALLOC
+    JSRS        R1, R1
+    STORE       R3, NODEVAL, SAVER4
+    ADDSI       R3, NODEPOINTER
+    STORE       R3, NODEPOINTER, HEADNODE
+    LEA         R4, HEADNODE
+    STORE       R4,R3, HEADNODE
+
+	JUMPS       R1
+
+;==========
+POP:
+    current = x 
+    ; set new head node
+    next = x.previous
+    value = x . value
+    x = next
+    
+    ; set old head = free ( free up the space)
+	LEA	        R5,R3,HEADNODE	
+	LOADS	    R6,R5
+	ADDSI	    R6,-ARSIZE
+	LOADS	    R3,R6
+	STORES	    R6,R5		
+
+	JUMPS       R1
+
+	END
